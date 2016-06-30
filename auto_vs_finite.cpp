@@ -6,7 +6,8 @@
 #include <cassert>
 #include <algorithm>
 
-// TODO profile second evaluate of the jacobian.
+// TODO profile repeated evaluated of the jacobian with autodiff, which might
+// be even faster.
 
 /// This is a dense function R^n -> R^m. It is templatized so that we can
 /// evaluate it on both double and adouble.
@@ -22,21 +23,24 @@ void constraint_function_dense(int n, int m, const T* x, T* y) {
 
 /// This is a sparse tridiagonal function R^n -> R^m. It is templatized so that
 /// we can evaluate it on both double and adouble.
-// TODO template <typename T>
-// TODO void constraint_function_tridiag(int n, int m, const T* x, T* y) {
-// TODO     int dim = std::min(n, m);
-// TODO     for (int j = 0; j < dim; ++j) {
-// TODO         y[j] = 0; // Clean up the given memory.
-// TODO         y[j] += x[j]; // TODO
-// TODO         if (j > 0) y[j] += x[j - 1];/*cos(x[i + 1]);*/
-// TODO         if (j < dim - 1) y[j] += x[j + 1]; /* TODO */
-// TODO         /*if (j < dim) log(x[i]
-// TODO         for (int i = j; i < n; ++i) {
-// TODO             y[j] += log(j + 2) * cos(x[i]) * x[(n - 1) - i];
-// TODO         }
-// TODO         */
-// TODO     }
-// TODO }
+template <typename T>
+void constraint_function_tridiag(int n, int m, const T* x, T* y) {
+    int dim = std::min(n, m);
+    for (int j = 0; j < dim; ++j) {
+        y[j] = 0; // Clean up the given memory.
+        // For all but the first element, depende on the previous element.
+        if (j > 0) y[j] += x[j - 1];/*cos(x[i + 1]);*/
+        // The j-th dependent variable depends on the j-th independent var.
+        y[j] += x[j]; // TODO
+        // For all but the last element, depend on the next element.
+        if (j < dim - 1) y[j] += x[j + 1]; /* TODO */
+        /*if (j < dim) log(x[i]
+        for (int i = j; i < n; ++i) {
+            y[j] += log(j + 2) * cos(x[i]) * x[(n - 1) - i];
+        }
+        */
+    }
+}
 
 /// This differentiates a function R^n -> R^m at px using ADOL-C.
 void auto_jacobian(int n, int m, const double* px, double** J) {
@@ -187,7 +191,7 @@ double timeit(Function f) {
 
 int main() {
     // Benchmarking on a dense jacobian.
-    int n = 1000; int m = 1000; // i.e., 100 nodes, 10 states
+    int n = 20; int m = 10000; // i.e., 100 nodes, 10 states
 
     // Generate a random point x.
     // For consistent results, use same seed each time.
