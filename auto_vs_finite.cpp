@@ -10,6 +10,7 @@
 /// evaluate it on both double and adouble.
 template <typename T>
 void constraint_function_dense(int n, int m, const T* x, T* y) {
+    // Clear any stale values in y.
     for (int j = 0; j < m; ++j) y[j] = 0; 
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
