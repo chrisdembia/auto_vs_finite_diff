@@ -7,7 +7,7 @@ before_install:
   - brew update
   - brew tap homebrew/science
   - brew update
-  - brew install cmake adol-c
+  - brew install adol-c
 
 install:
   - mkdir build
