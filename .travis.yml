@@ -1,12 +1,13 @@
 
 language: cpp
 os: osx
+compiler: clang
 
 before_install:
   - brew update
   - brew tap homebrew/science
   - brew update
-  - brew install adol-c
+  - brew install cmake adol-c
 
 install:
   - mkdir build
