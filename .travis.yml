@@ -3,7 +3,10 @@ language: cpp
 os: osx
 
 before_install:
-  - brew install homebrew/science/adol-c
+  - brew update
+  - brew tap homebrew/science
+  - brew update
+  - brew install adol-c
 
 install:
   - mkdir build
